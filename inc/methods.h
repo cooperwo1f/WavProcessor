@@ -8,9 +8,9 @@
 WavFileHeader read_wav_file(FILE* fp);
 WavFileHeader read_wav_arr(uint32_t* buf, size_t len);
 
-int verify_format(WavFileHeader header);
-void print_wav_header(WavFileHeader wav);
+int verify_format(FILE* fd, WavFileHeader header);
 
-void debug_array(int* buf, size_t len);
+void print_wav_header(FILE* fd, WavFileHeader wav);
+void debug_array(FILE* fd, int* buf, size_t len);
 
 #endif /* WAV_METHODS_H */
