@@ -24,16 +24,14 @@ int main(int argc, char** argv) {
 
 
   while ((ch = fgetc(stdin)) != EOF) {
-    if (i > header.Header.Size.w) { break; }
+    if (i++ > header.Header.Size.w) { break; }
 
     /* Do something here */
 
-    i++;
   }
 
-
-  printf("i: %zu \n", i);
-  printf("ch: %d \n", ch);
+  /* No newline here causes abort trap 6 */
+  fputc('\n', stdout);
 
   return EXIT_SUCCESS;
 }
