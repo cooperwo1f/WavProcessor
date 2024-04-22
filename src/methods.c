@@ -156,7 +156,7 @@ int verify_format(WavFileHeader header) {
     return EXIT_FAILURE;
   }
 
-  if (header.Format.Format.hw != 1) {
+  if (header.Format.Format.hw != PCM) {
     fprintf(stderr, "File must contain uncompressed PCM stream [Format.Format=%u]", header.Format.Format.hw);
     return EXIT_FAILURE;
   }
