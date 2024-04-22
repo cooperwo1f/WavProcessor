@@ -16,10 +16,9 @@ INCLUDES = -I./$(INC_DIR)
 
 CFLAGS = -O2 $(INCLUDES)
 
-.PHONY: all flags clean
+.PHONY: all clean
 
-all: $(BUILD_DIR)/$(TARGET) $(BUILD_DIR)/$(COMPILE_FLAGS)
-flags: $(BUILD_DIR)/$(COMPILE_FLAGS)
+all: $(BUILD_DIR)/$(TARGET) $(BUILD_DIR)/$(COMPILE_FLAG)
 
 $(BUILD_DIR)/$(TARGET): $(OBJECTS) | $(BUILD_DIR)
 	$(CC) $(CFLAGS) $(OBJECTS) -o $@
@@ -27,7 +26,7 @@ $(BUILD_DIR)/$(TARGET): $(OBJECTS) | $(BUILD_DIR)
 $(BUILD_DIR)/%.o: $(SRC_DIR)/%.c $(HEADERS) | $(BUILD_DIR)
 	$(CC) $(CFLAGS) -c $< -o $@
 
-$(BUILD_DIR)/$(COMPILE_FLAGS): Makefile | $(BUILD_DIR)
+$(BUILD_DIR)/$(COMPILE_FLAGS): | $(BUILD_DIR)
 	@echo $(CFLAGS) | sed -E 's/-I\.\//-I..\//g' | tr ' ' '\n' > $(BUILD_DIR)/$(COMPILE_FLAGS)
 
 $(BUILD_DIR):
