@@ -3,6 +3,8 @@
 
 #include <stdint.h>
 
+#define PCM 1
+
 typedef union _ByteAddressableWord {
     uint32_t w;
     uint8_t b[sizeof(uint32_t)];

@@ -24,7 +24,7 @@ int main(int argc, char** argv) {
 
 
   while ((ch = fgetc(stdin)) != EOF) {
-    /* if (i > header.Header.Size.w) { break; } */
+    if (i > header.Header.Size.w) { break; }
 
     /* Do something here */
 
@@ -32,8 +32,8 @@ int main(int argc, char** argv) {
   }
 
 
-  putc('\n', stdout);
-  printf("i: %d \n", 10);
+  printf("i: %zu \n", i);
+  printf("ch: %d \n", ch);
 
   return EXIT_SUCCESS;
 }

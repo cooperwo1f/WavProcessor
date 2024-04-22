@@ -40,9 +40,9 @@ Header read_header_arr(uint32_t* buf, size_t len) {
 }
 
 void print_header(Header header) {
-    printf("HeaderId: %12.*s \n", (int)sizeof(uint32_t), header.Id.b);
+    printf("HeaderId: %12.*s \n", (int)sizeof(header.Id.w), header.Id.b);
     printf("HeaderSize: %10u \n", header.Size.w);
-    printf("HeaderData: %10.*s \n", (int)sizeof(uint32_t), header.Data.b);
+    printf("HeaderData: %10.*s \n", (int)sizeof(header.Data.w), header.Data.b);
 }
 
 Format read_format_file(FILE* fp) {
@@ -102,7 +102,7 @@ Format read_format_arr(uint32_t* buf, size_t len) {
 }
 
 void print_format(Format format) {
-    printf("FormatId: %12.*s \n", (int)sizeof(uint32_t), format.Id.b);
+    printf("FormatId: %12.*s \n", (int)sizeof(format.Id.w), format.Id.b);
     printf("FormatSize: %10u\n", format.Size.w);
     printf("Format: %14u\n", format.Format.hw);
     printf("Channels: %12u\n", format.Channels.hw);
@@ -146,13 +146,13 @@ int is_RIFF_format(FILE* fp) {
 }
 
 int verify_format(WavFileHeader header) {
-  if (strncmp((char*)header.Header.Id.b, "RIFF", (int)sizeof(uint32_t)) != 0) {
-    fprintf(stderr, "File must be RIFF format, may have been error reading stream [Header.Id=%.*s]", (int)sizeof(uint32_t), header.Header.Id.b);
+  if (strncmp((char*)header.Header.Id.b, "RIFF", (int)sizeof(header.Header.Id.w)) != 0) {
+    fprintf(stderr, "File must be RIFF format, may have been error reading stream [Header.Id=%.*s]", (int)sizeof(header.Header.Data.w), header.Header.Id.b);
     return EXIT_FAILURE;
   }
 
-  if (strncmp((char*)header.Header.Data.b, "WAVE", (int)sizeof(uint32_t)) != 0) {
-    fprintf(stderr, "Error reading stream, expected header data to contain 'WAVE' [Header.Data=%.*s]", (int)sizeof(uint32_t), header.Header.Data.b);
+  if (strncmp((char*)header.Header.Data.b, "WAVE", (int)sizeof(header.Header.Data.w)) != 0) {
+    fprintf(stderr, "Error reading stream, expected header data to contain 'WAVE' [Header.Data=%.*s]", (int)sizeof(header.Header.Data.w), header.Header.Data.b);
     return EXIT_FAILURE;
   }
 
