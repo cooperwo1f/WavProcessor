@@ -7,31 +7,30 @@
 #include "methods.h"
 
 int main(int argc, char** argv) {
-  size_t i = 0;
+    uint32_t header_buf[sizeof(WavFileHeader)];
+    size_t i = 0;
+    int ch;
 
-  int header_buf[sizeof(WavFileHeader)];
-  int ch;
+    /* Fill character buffer with number of bytes expected in wav header */
+    while ((ch = fgetc(stdin)) != EOF && i < sizeof(WavFileHeader)) {
+        header_buf[i++] = (uint32_t)ch;
+        fputc(ch, stdout);
+    }
 
-  /* Fill character buffer with number of bytes expected in wav header */
-  while ((ch = fgetc(stdin)) != EOF) {
-    if (i > sizeof(WavFileHeader)) { break; }
-    header_buf[i++] = ch;
-  }
+    /* Generate wav header from out filled array */
+    WavFileHeader header = read_wav_arr(header_buf, sizeof(header_buf)/sizeof(int));
+    if (verify_format(stderr, header) != EXIT_SUCCESS) { return EXIT_FAILURE; }
+    print_wav_header(stderr, header);
 
-  /* Generate wav header from out filled array */
-  WavFileHeader header = read_wav_arr((uint32_t*)header_buf, sizeof(header_buf)/sizeof(int));
-  if (verify_format(header) != EXIT_SUCCESS) { return EXIT_FAILURE; }
+    /* TODO: take out data chunk so can mess with other things */
 
+    do {
+        fputc(ch, stdout);
+        i++;
 
-  while ((ch = fgetc(stdin)) != EOF) {
-    if (i++ > header.Header.Size.w) { break; }
+    /* Must be do..while here
+     * as ch is still holding a character we need */
+    } while ((ch = fgetc(stdin)) != EOF && i < header.Header.Size.w);
 
-    /* Do something here */
-
-  }
-
-  /* No newline here causes abort trap 6 */
-  fputc('\n', stdout);
-
-  return EXIT_SUCCESS;
+    return EXIT_SUCCESS;
 }
