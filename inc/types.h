@@ -33,6 +33,11 @@ typedef struct _Format {
     ByteAddressableHalfWord BitsPerSample;  /* 8 bits = 8, 16 bits = 16, etc. */
 } Format;
 
+typedef struct _DataHeader {
+    ByteAddressableWord Id;                 /* Contains the letters "data" */
+    ByteAddressableWord Size;               /* Size of the data chunk */
+} DataHeader;
+
 typedef struct _WavFileHeader {
     Header Header;
     Format Format;
