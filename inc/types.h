@@ -20,6 +20,11 @@ typedef union _ByteAddressableSignedWord {
     uint8_t b[sizeof(int32_t)];
 } ByteAddressableSignedWord;
 
+typedef union _ByteAddressableSignedHalfWord {
+    int16_t sw;
+    uint8_t b[sizeof(int16_t)];
+} ByteAddressableSignedHalfWord;
+
 
 typedef struct _Header {
     ByteAddressableWord Id;                 /* Contains the letters "RIFF" */

@@ -159,7 +159,7 @@ WavFileHeader read_wav_arr(uint32_t* buf, size_t len) {
     if (len != (sizeof(WavFileHeader))) { return default_wav_header(); }
 
     size_t format_offset = sizeof(Header);
-    size_t data_offset = format_offset + sizeof(Format) - 2; /* Padding compensation */
+    size_t data_offset = format_offset + sizeof(Format) - 4;
 
     return (WavFileHeader){
         .Header = read_header_arr(buf, len),
@@ -211,17 +211,15 @@ void debug_array(FILE* fd, int* buf, size_t len) {
   fputc('\n', fd);
 }
 
-void write_block(FILE* fd, WavFileHeader header, ByteAddressableSignedWord samples[][header.Format.Channels.hw], size_t index) {
-    for (uint16_t nibble = 0; nibble < (header.Format.BlockAlign.hw / header.Format.Channels.hw); nibble++) {
-        for (uint16_t channel = 0; channel < header.Format.Channels.hw; channel++) {
+void write_block(FILE* fd, WavFileHeader header, ByteAddressableSignedHalfWord samples[][header.Format.Channels.hw], size_t index) {
+    for (uint16_t channel = 0; channel < (header.Format.BlockAlign.hw / header.Format.Channels.hw); channel++) {
+        for (uint16_t nibble = 0; nibble < header.Format.Channels.hw; nibble++) {
             fputc(samples[index][channel].b[nibble], fd);
         }
     }
 }
 
-void process_sample(FILE* fd, ProcessingInfo info, WavFileHeader header, ByteAddressableSignedWord samples[][header.Format.Channels.hw], size_t index) {
-
-    /* Process sample here */
-
+void process_sample(FILE* fd, ProcessingInfo info, WavFileHeader header, ByteAddressableSignedHalfWord samples[][header.Format.Channels.hw], size_t index) {
+    samples[index][1].sw *= 1;
     write_block(fd, header, samples, index);
 }
