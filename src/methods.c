@@ -1,3 +1,4 @@
+#include <math.h>
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -211,6 +212,42 @@ void debug_array(FILE* fd, int* buf, size_t len) {
   fputc('\n', fd);
 }
 
+void process_phase(WavFileHeader header, ByteAddressableSignedHalfWord samples[][header.Format.Channels.hw], float factor, size_t index) {
+    size_t samples_to_shift = header.Format.SampleRate.w * fabsf(factor);
+    if (index - samples_to_shift < 0) {
+        fprintf(stderr, "Not enough samples to shift yet \n");
+        return;
+    }
+
+    for (uint16_t channel = 0; channel < header.Format.Channels.hw; channel++) {
+        if (channel % 2 == 0) {
+            if (factor > 0) { samples[index][channel].sw = samples[index - samples_to_shift][channel].sw; }
+        }
+
+        else {
+            if (factor < 0) { samples[index][channel].sw = samples[index - samples_to_shift][channel].sw; }
+        }
+    }
+}
+
+void process_panning(ByteAddressableSignedHalfWord samples[], float factor, uint16_t channels) {
+    for (uint16_t channel = 0; channel < channels; channel++) {
+        if (channel % 2 == 0) {
+            if (factor < 0) { samples[channel].sw *= 1 + factor; }
+        }
+
+        else {
+            if (factor > 0) { samples[channel].sw *= 1 - factor; }
+        }
+    }
+}
+
+void process_volume(ByteAddressableSignedHalfWord samples[], float factor, uint16_t channels) {
+    for (uint16_t channel = 0; channel < channels; channel++) {
+        samples[channel].sw *= factor;
+    }
+}
+
 void write_block(FILE* fd, WavFileHeader header, ByteAddressableSignedHalfWord samples[][header.Format.Channels.hw], size_t index) {
     for (uint16_t channel = 0; channel < (header.Format.BlockAlign.hw / header.Format.Channels.hw); channel++) {
         for (uint16_t nibble = 0; nibble < header.Format.Channels.hw; nibble++) {
@@ -220,6 +257,9 @@ void write_block(FILE* fd, WavFileHeader header, ByteAddressableSignedHalfWord s
 }
 
 void process_sample(FILE* fd, ProcessingInfo info, WavFileHeader header, ByteAddressableSignedHalfWord samples[][header.Format.Channels.hw], size_t index) {
-    samples[index][1].sw *= 1;
+    process_phase(header, samples, info.panning, index);
+    process_panning(samples[index], info.panning, header.Format.Channels.hw);
+    process_volume(samples[index], info.volume, header.Format.Channels.hw);
+
     write_block(fd, header, samples, index);
 }

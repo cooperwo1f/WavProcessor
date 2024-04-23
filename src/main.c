@@ -8,22 +8,6 @@
 #include "types.h"
 #include "methods.h"
 
-// Assumes little endian
-void printBits(FILE* fd, void const * const ptr, size_t const size)
-{
-    unsigned char *b = (unsigned char*) ptr;
-    unsigned char byte;
-    int i, j;
-
-    for (i = size-1; i >= 0; i--) {
-        for (j = 7; j >= 0; j--) {
-            byte = (b[i] >> j) & 1;
-            fprintf(fd, "%u", byte);
-        }
-    }
-    fputc('\n', fd);
-}
-
 int main(int argc, char** argv) {
     Arguments args = parse_arguments(argc, argv);
     ProcessingInfo info = { .volume = args.volume, .panning = args.panning, .phase_offset = args.phase_offset };
@@ -40,6 +24,7 @@ int main(int argc, char** argv) {
     }
 
 
+    /* TODO: figure out why this is here and what purpose it serves */
     /* Two bytes of padding? */
     i++;
     fputc(ch, stdout);
@@ -54,7 +39,7 @@ int main(int argc, char** argv) {
     if (verify_format(stderr, header) != EXIT_SUCCESS) { return EXIT_FAILURE; }
 
 
-    size_t samples_num = (header.Format.SampleRate.w * header.Format.BlockAlign.hw * fabsf(info.phase_offset)) + 1;
+    size_t samples_num = (header.Format.SampleRate.w * header.Format.BlockAlign.hw * fabsf(info.phase_offset)) + header.Format.BlockAlign.hw;
     ByteAddressableSignedHalfWord samples[samples_num][header.Format.Channels.hw];
 
     size_t prev_array_index = 0;
@@ -75,8 +60,6 @@ int main(int argc, char** argv) {
         }
 
         samples[array_index][channel_num].b[nibble_num] = ch;
-        if (array_index == 40911 && nibble_num == 1 && channel_num == 1) fprintf(stderr, "L: %d \nR: %d \n", samples[array_index][0].sw, samples[array_index][1].sw);
-        /* if (array_index == 40911 && nibble_num == 1 && channel_num == 1) printBits(stderr, &samples[array_index][0].sw, sizeof(int16_t)); */
         prev_array_index = array_index;
     }
 
