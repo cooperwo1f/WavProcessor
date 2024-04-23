@@ -262,18 +262,6 @@ void debug_array(FILE* fd, int* buf, size_t len) {
   fputc('\n', fd);
 }
 
-int process_phase(int sample) {
-    return sample;
-}
-
-int process_panning(int sample) {
-    return sample;
-}
-
-int process_volume(int sample, float volume) {
-    return sample;
-}
-
 void write_block(FILE* fd, WavFileHeader header, ByteAddressableSignedWord samples[][header.Format.Channels.hw], size_t index) {
     for (uint16_t nibble = 0; nibble < (header.Format.BlockAlign.hw / header.Format.Channels.hw); nibble++) {
         for (uint16_t channel = 0; channel < header.Format.Channels.hw; channel++) {
@@ -282,35 +270,9 @@ void write_block(FILE* fd, WavFileHeader header, ByteAddressableSignedWord sampl
     }
 }
 
-/* Needs to take in current sample, apply process as specified in process_info, and return appropriate sample */
-/* TODO: explore what happens when sample index reaches header.Data.Size.w */
 void process_sample(FILE* fd, ProcessingInfo info, WavFileHeader header, ByteAddressableSignedWord samples[][header.Format.Channels.hw], size_t index) {
+
+    /* Process sample here */
+
     write_block(fd, header, samples, index);
-
-    /* No idea how this would work with 18-bit PCM */
-    /* uint16_t nibble_num = 0; */
-    /* uint16_t channel_num = 0; */
-
-    /* /\* SampleRate = 1 second of samples *\/ */
-    /* size_t num_of_seconds = 2; */
-    /* size_t samples_per_second = header.Format.SampleRate.w * header.Format.BlockAlign.hw; */
-    /* size_t samples_to_store = samples_per_second * num_of_seconds; */
-
-    /* size_t sample_index = 0; */
-    /* ByteAddressableSignedWord samples[samples_to_store][header.Format.Channels.hw]; */
-
-    /*     size_t array_index = sample_index / header.Format.BlockAlign.hw; */
-
-    /*     if (sample_index % header.Format.Channels.hw == 0) { channel_num = 0; nibble_num++; } */
-    /*     if (sample_index % header.Format.BlockAlign.hw == 0) { nibble_num = 0; } */
-
-    /*     samples[array_index % samples_to_store][channel_num].b[nibble_num] = fgetc(stdin); */
-
-    /*     if (array_index > 100) */
-    /*         fputc(samples[(sample_index/header.Format.BlockAlign.hw) % samples_to_store][channel_num].b[nibble_num], stdout); */
-
-    /*     i++; */
-    /*     sample_index++; */
-    /*     channel_num++; */
-
 }

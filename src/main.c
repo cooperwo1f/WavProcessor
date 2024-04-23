@@ -44,6 +44,7 @@ int main(int argc, char** argv) {
     size_t start_index = header.Header.Size.w - header.Data.Size.w + sizeof(header.Data) + 4;
 
     /* Process raw data stream */
+    /* TODO: explore what happens when sample index reaches header.Data.Size.w */
     while ((ch = fgetc(stdin)) != EOF) {
         size_t sample_index = i++ - start_index;
 
