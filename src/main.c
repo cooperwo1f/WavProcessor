@@ -10,8 +10,8 @@
 
 int main(int argc, char** argv) {
     Arguments args = parse_arguments(argc, argv);
-
     ProcessingInfo info = { .volume = args.volume, .panning = args.panning, .phase_offset = args.phase_offset };
+
     uint32_t header_buf[sizeof(WavFileHeader)];
     size_t i = 0;
     int ch;
@@ -34,8 +34,9 @@ int main(int argc, char** argv) {
 
     /* Generate wav header from filled out array */
     WavFileHeader header = read_wav_arr(header_buf, sizeof(header_buf)/sizeof(int));
-    if (verify_format(stderr, header) != EXIT_SUCCESS) { return EXIT_FAILURE; }
     if (args.verbose) { print_wav_header(stderr, header); }
+    if (verify_format(stderr, header) != EXIT_SUCCESS) { return EXIT_FAILURE; }
+
 
     size_t samples_num = (header.Format.SampleRate.w * header.Format.BlockAlign.hw * fabsf(info.phase_offset)) + 1;
     ByteAddressableSignedWord samples[samples_num][header.Format.Channels.hw];
@@ -60,6 +61,7 @@ int main(int argc, char** argv) {
         prev_array_index = array_index;
     }
 
+    /* Since always processing previous sample, need to finish processing final sample here */
     process_sample(stdout, info, header, samples, prev_array_index);
 
     return EXIT_SUCCESS;

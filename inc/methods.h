@@ -5,7 +5,6 @@
 #include <stdint.h>
 #include "types.h"
 
-WavFileHeader read_wav_file(FILE* fp);
 WavFileHeader read_wav_arr(uint32_t* buf, size_t len);
 
 void process_sample(FILE* fd, ProcessingInfo info, WavFileHeader header, ByteAddressableSignedWord samples[][header.Format.Channels.hw], size_t index);

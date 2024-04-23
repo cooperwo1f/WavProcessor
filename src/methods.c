@@ -20,16 +20,6 @@ Header default_header() {
     };
 }
 
-Header read_header_file(FILE* fp) {
-    Header header = default_header();
-
-    fread(&header.Id.w,   sizeof(header.Id),   1, fp);
-    fread(&header.Size.w, sizeof(header.Size), 1, fp);
-    fread(&header.Data.w, sizeof(header.Data), 1, fp);
-
-    return header;
-}
-
 Header read_header_arr(uint32_t* buf, size_t len) {
     /* Verify array will fit into header, otherwise return empty header */
     if (sizeof(Header) > len) return default_header();
@@ -72,21 +62,6 @@ Format default_format() {
         .BlockAlign.hw = 0,
         .BitsPerSample.hw = 0
     };
-}
-
-Format read_format_file(FILE* fp) {
-    Format format = default_format();
-
-    fread(&format.Id.w,             sizeof(format.Id),            1, fp);
-    fread(&format.Size.w,           sizeof(format.Size),          1, fp);
-    fread(&format.Format.hw,        sizeof(format.Format),        1, fp);
-    fread(&format.Channels.hw,      sizeof(format.Channels),      1, fp);
-    fread(&format.SampleRate.w,     sizeof(format.SampleRate),    1, fp);
-    fread(&format.ByteRate.w,       sizeof(format.ByteRate),      1, fp);
-    fread(&format.BlockAlign.hw,    sizeof(format.BlockAlign),    1, fp);
-    fread(&format.BitsPerSample.hw, sizeof(format.BitsPerSample), 1, fp);
-
-    return format;
 }
 
 Format read_format_arr(uint32_t* buf, size_t len) {
@@ -149,15 +124,6 @@ Data default_data_header() {
     };
 }
 
-Data read_data_header_file(FILE* fp) {
-    Data data_header = default_data_header();
-
-    fread(&data_header.Id.w,   sizeof(data_header.Id),   1, fp);
-    fread(&data_header.Size.w, sizeof(data_header.Size), 1, fp);
-
-    return data_header;
-}
-
 Data read_data_header_arr(uint32_t* buf, size_t len) {
     /* Verify array will fit into data_header, otherwise return empty data_header */
     if (sizeof(Data) > len) return default_data_header();
@@ -188,14 +154,6 @@ WavFileHeader default_wav_header() {
     };
 }
 
-WavFileHeader read_wav_file(FILE* fp) {
-    return (WavFileHeader){
-        .Header = read_header_file(fp),
-        .Format = read_format_file(fp),
-        .Data = read_data_header_file(fp)
-    };
-}
-
 WavFileHeader read_wav_arr(uint32_t* buf, size_t len) {
     /* If array does not match header, return empty WavFileHeader */
     if (len != (sizeof(WavFileHeader))) { return default_wav_header(); }
@@ -208,15 +166,6 @@ WavFileHeader read_wav_arr(uint32_t* buf, size_t len) {
         .Format = read_format_arr(buf + format_offset, len - format_offset),
         .Data = read_data_header_arr(buf + data_offset, len - data_offset)
     };
-}
-
-int is_RIFF_format(FILE* fp) {
-    char chunk_id[sizeof(((Header*)0)->Id)];
-
-    fread(chunk_id, sizeof(chunk_id), 1, fp);
-    rewind(fp);
-
-    return strcmp(chunk_id, "RIFF");
 }
 
 int verify_format(FILE* fd, WavFileHeader header) {
