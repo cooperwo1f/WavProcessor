@@ -1,3 +1,4 @@
+#include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -273,14 +274,18 @@ int process_volume(int sample, float volume) {
     return sample;
 }
 
+void write_block(FILE* fd, WavFileHeader header, ByteAddressableSignedWord samples[][header.Format.Channels.hw], size_t index) {
+    for (uint16_t nibble = 0; nibble < (header.Format.BlockAlign.hw / header.Format.Channels.hw); nibble++) {
+        for (uint16_t channel = 0; channel < header.Format.Channels.hw; channel++) {
+            fputc(samples[index][channel].b[nibble], fd);
+        }
+    }
+}
+
 /* Needs to take in current sample, apply process as specified in process_info, and return appropriate sample */
 /* TODO: explore what happens when sample index reaches header.Data.Size.w */
-int process_sample(ProcessingInfo info, WavFileHeader header, int sample, size_t index) {
-    sample = process_phase(sample);
-    sample = process_panning(sample);
-    sample = process_volume(sample, info.volume);
-
-    return sample;
+void process_sample(FILE* fd, ProcessingInfo info, WavFileHeader header, ByteAddressableSignedWord samples[][header.Format.Channels.hw], size_t index) {
+    write_block(fd, header, samples, index);
 
     /* No idea how this would work with 18-bit PCM */
     /* uint16_t nibble_num = 0; */

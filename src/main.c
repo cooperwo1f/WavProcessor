@@ -40,21 +40,26 @@ int main(int argc, char** argv) {
     size_t samples_num = (header.Format.SampleRate.w * header.Format.BlockAlign.hw * fabsf(info.phase_offset)) + 1;
     ByteAddressableSignedWord samples[samples_num][header.Format.Channels.hw];
 
+    size_t prev_array_index = 0;
     size_t start_index = header.Header.Size.w - header.Data.Size.w + sizeof(header.Data) + 4;
 
     /* Process raw data stream */
     while ((ch = fgetc(stdin)) != EOF) {
-        size_t sample_index = i - start_index;
+        size_t sample_index = i++ - start_index;
 
-        size_t array_index = sample_index / header.Format.BlockAlign.hw;
+        size_t array_index = (sample_index / header.Format.BlockAlign.hw) % samples_num;
         size_t channel_num = sample_index % header.Format.Channels.hw;
         size_t nibble_num = (sample_index / header.Format.Channels.hw) % (header.Format.BlockAlign.hw / header.Format.Channels.hw);
 
-        samples[array_index][channel_num].b[nibble_num] = ch;
-        fputc(samples[array_index][channel_num].b[nibble_num], stdout);
+        if (array_index != prev_array_index) {
+            process_sample(stdout, info, header, samples, prev_array_index);
+        }
 
-        i++;
+        samples[array_index][channel_num].b[nibble_num] = ch;
+        prev_array_index = array_index;
     }
+
+    process_sample(stdout, info, header, samples, prev_array_index);
 
     return EXIT_SUCCESS;
 }
