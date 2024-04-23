@@ -8,6 +8,7 @@
 WavFileHeader read_wav_file(FILE* fp);
 WavFileHeader read_wav_arr(uint32_t* buf, size_t len);
 
+int process_sample(ProcessingInfo info, WavFileHeader header, int sample, size_t index);
 int verify_format(FILE* fd, WavFileHeader header);
 
 void print_wav_header(FILE* fd, WavFileHeader wav);
