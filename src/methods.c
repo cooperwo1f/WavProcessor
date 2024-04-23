@@ -276,14 +276,6 @@ int process_volume(int sample, float volume) {
 /* Needs to take in current sample, apply process as specified in process_info, and return appropriate sample */
 /* TODO: explore what happens when sample index reaches header.Data.Size.w */
 int process_sample(ProcessingInfo info, WavFileHeader header, int sample, size_t index) {
-    size_t start_index = header.Header.Size.w - header.Data.Size.w + sizeof(header.Data) + 4;
-
-    size_t sample_index = index - start_index;
-    size_t array_index = sample_index / header.Format.BlockAlign.hw;
-
-    size_t channel_num = sample_index % header.Format.Channels.hw;
-    size_t nibble_num = (sample_index / header.Format.Channels.hw) % (header.Format.BlockAlign.hw / header.Format.Channels.hw);
-
     sample = process_phase(sample);
     sample = process_panning(sample);
     sample = process_volume(sample, info.volume);
