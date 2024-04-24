@@ -27,7 +27,8 @@ $(BUILD_DIR)/%.o: $(SRC_DIR)/%.c $(HEADERS) | $(BUILD_DIR)
 	$(CC) $(CFLAGS) -c $< -o $@
 
 $(BUILD_DIR)/$(COMPILE_FLAGS): | $(BUILD_DIR)
-	@echo $(CFLAGS) | sed -E 's/-I\.\//-I..\//g' | tr ' ' '\n' > $(BUILD_DIR)/$(COMPILE_FLAGS)
+	@echo "creating $(BUILD_DIR)/$(COMPILE_FLAGS)"
+	@echo "$(CFLAGS)" | sed -E 's/(-I\.\/|-I)([^\/]+)/-I..\/\2/g' | tr ' ' '\n' > "$(BUILD_DIR)/$(COMPILE_FLAGS)"
 
 $(BUILD_DIR):
 	mkdir -p $@
