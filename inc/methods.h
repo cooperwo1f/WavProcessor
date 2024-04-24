@@ -7,7 +7,7 @@
 
 WavFileHeader read_wav_arr(uint32_t* buf, size_t len);
 
-void process_sample(FILE* fd, ProcessingInfo info, WavFileHeader header, ByteAddressableSignedHalfWord samples[][header.Format.Channels.hw], size_t index);
+void process_sample(FILE* fd, ProcessingInfo info, WavFileHeader header, ByteAddressableSignedHalfWord samples[][header.Format.Channels.hw], size_t length, size_t index);
 int verify_format(FILE* fd, WavFileHeader header);
 
 void print_wav_header(FILE* fd, WavFileHeader wav);

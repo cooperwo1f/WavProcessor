@@ -56,7 +56,7 @@ int main(int argc, char** argv) {
         size_t channel_num = (sample_index / header.Format.Channels.hw) % (header.Format.BlockAlign.hw / header.Format.Channels.hw);
 
         if (array_index != prev_array_index) {
-            process_sample(stdout, info, header, samples, prev_array_index);
+            process_sample(stdout, info, header, samples, samples_num, prev_array_index);
         }
 
         samples[array_index][channel_num].b[nibble_num] = ch;
@@ -64,7 +64,7 @@ int main(int argc, char** argv) {
     }
 
     /* Since always processing previous sample, need to finish processing final sample here */
-    process_sample(stdout, info, header, samples, prev_array_index);
+    process_sample(stdout, info, header, samples, samples_num, prev_array_index);
 
     return EXIT_SUCCESS;
 }

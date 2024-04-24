@@ -1,4 +1,4 @@
-TARGET = WavFileReader
+TARGET = WavProcessor
 
 SRC_DIR = src
 INC_DIR = inc

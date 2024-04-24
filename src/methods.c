@@ -212,21 +212,16 @@ void debug_array(FILE* fd, int* buf, size_t len) {
   fputc('\n', fd);
 }
 
-void process_phase(WavFileHeader header, ByteAddressableSignedHalfWord samples[][header.Format.Channels.hw], float factor, size_t index) {
+void process_phase(ByteAddressableSignedHalfWord block[], WavFileHeader header, ByteAddressableSignedHalfWord samples[][header.Format.Channels.hw], float factor, size_t index, size_t length) {
     size_t samples_to_shift = header.Format.SampleRate.w * fabsf(factor);
-    if (index - samples_to_shift < 0) {
-        fprintf(stderr, "Not enough samples to shift yet \n");
-        return;
-    }
+    int32_t new_index = index - samples_to_shift;
+
+    /* If negative, the amount it has become negative is the index from the last sample */
+    /* For example, index = 4, samples_to_shift = 8, new_index = -4, new_index becomes length - 4 */
+    if (new_index < 0) { new_index = length + new_index; }
 
     for (uint16_t channel = 0; channel < header.Format.Channels.hw; channel++) {
-        if (channel % 2 == 0) {
-            if (factor > 0) { samples[index][channel].sw = samples[index - samples_to_shift][channel].sw; }
-        }
-
-        else {
-            if (factor < 0) { samples[index][channel].sw = samples[index - samples_to_shift][channel].sw; }
-        }
+        block[channel].sw = samples[new_index][channel].sw;
     }
 }
 
@@ -256,10 +251,16 @@ void write_block(FILE* fd, WavFileHeader header, ByteAddressableSignedHalfWord s
     }
 }
 
-void process_sample(FILE* fd, ProcessingInfo info, WavFileHeader header, ByteAddressableSignedHalfWord samples[][header.Format.Channels.hw], size_t index) {
-    process_phase(header, samples, info.panning, index);
-    process_panning(samples[index], info.panning, header.Format.Channels.hw);
-    process_volume(samples[index], info.volume, header.Format.Channels.hw);
+void process_sample(FILE* fd, ProcessingInfo info, WavFileHeader header, ByteAddressableSignedHalfWord samples[][header.Format.Channels.hw], size_t length, size_t index) {
+    ByteAddressableSignedHalfWord block[header.Format.Channels.hw];
+
+    for (uint16_t channel = 0; channel < header.Format.Channels.hw; channel++) {
+        block[channel].sw = samples[index][channel].sw;
+    }
+
+    process_phase(block, header, samples, info.phase_offset, index, length);
+    process_panning(block, info.panning, header.Format.Channels.hw);
+    process_volume(block, info.volume, header.Format.Channels.hw);
 
     write_block(fd, header, samples, index);
 }
