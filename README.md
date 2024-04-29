@@ -28,7 +28,7 @@ Pipe data to the `WavProcessor` binary, the processed file will be printed stdou
 If `--verbose` or `-v` are present, additional information will be printed to stderr
 
 ``` shell
-./build/WavProcessor < testing/test.wav #note: raw stream will be outputted to terminal
+./build/WavProcessor < testing/test.wav # Note: raw stream will be outputted to terminal
 ```
 Or
 
@@ -51,5 +51,5 @@ Values above and below this are also allowed but the memory usage will quickly i
 
 An example of volume and panning processing on a stream can be seen below 
 ``` shell
-./build/WavProcessor --volume=0.5 --panning=1 < ./testing/test.wav | play -q - #note: requires sox
+./build/WavProcessor --volume=0.5 --panning=1 < ./testing/test.wav | play -q - # Note: requires sox
 ```
