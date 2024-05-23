@@ -221,7 +221,13 @@ void process_phase(ByteAddressableSignedHalfWord block[], WavFileHeader header, 
     if (new_index < 0) { new_index = length + new_index; }
 
     for (uint16_t channel = 0; channel < header.Format.Channels.hw; channel++) {
-        block[channel].sw = samples[new_index][channel].sw;
+        if (channel % 2 == 0) {
+            if (factor < 0) { block[channel].sw = samples[new_index][channel].sw; }
+        }
+
+        else {
+            if (factor > 0) { block[channel].sw = samples[new_index][channel].sw; }
+        }
     }
 }
 
@@ -243,10 +249,10 @@ void process_volume(ByteAddressableSignedHalfWord samples[], float factor, uint1
     }
 }
 
-void write_block(FILE* fd, WavFileHeader header, ByteAddressableSignedHalfWord samples[][header.Format.Channels.hw], size_t index) {
+void write_block(FILE* fd, WavFileHeader header, ByteAddressableSignedHalfWord block[header.Format.Channels.hw]) {
     for (uint16_t channel = 0; channel < (header.Format.BlockAlign.hw / header.Format.Channels.hw); channel++) {
         for (uint16_t nibble = 0; nibble < header.Format.Channels.hw; nibble++) {
-            fputc(samples[index][channel].b[nibble], fd);
+            fputc(block[channel].b[nibble], fd);
         }
     }
 }
@@ -262,5 +268,5 @@ void process_sample(FILE* fd, ProcessingInfo info, WavFileHeader header, ByteAdd
     process_panning(block, info.panning, header.Format.Channels.hw);
     process_volume(block, info.volume, header.Format.Channels.hw);
 
-    write_block(fd, header, samples, index);
+    write_block(fd, header, block);
 }
