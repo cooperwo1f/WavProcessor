@@ -41,6 +41,7 @@ int main(int argc, char** argv) {
 
     size_t samples_num = (header.Format.SampleRate.w * header.Format.BlockAlign.hw * fabsf(info.phase_offset)) + header.Format.BlockAlign.hw;
     ByteAddressableSignedHalfWord samples[samples_num][header.Format.Channels.hw];
+    memset((void*)&samples, 0, sizeof(samples));
 
     size_t prev_array_index = 0;
     size_t start_index = header.Header.Size.w - header.Data.Size.w + sizeof(header.Data) + 4;
