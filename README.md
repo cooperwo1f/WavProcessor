@@ -1,5 +1,5 @@
 # WAV File Processor
-Program for processing WAV file streams in real-time (based on WAV header reading project by [franciscohanna92](github.com/franciscohanna92/wav_reader.git))
+Program for processing WAV file streams in real-time (based on WAV header reading project by [franciscohanna92](http://github.com/franciscohanna92/wav_reader.git))
 
 ## Why
 I wanted to understand more about processing raw audio data and .wav files are [fairly basic](http://soundfile.sapp.org/doc/WaveFormat/).
