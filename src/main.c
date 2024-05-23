@@ -20,9 +20,22 @@ int main(int argc, char** argv) {
     /* Fill character buffer with number of bytes expected in wav header */
     while ((ch = fgetc(stdin)) != EOF && i < sizeof(WavFileHeader)) {
         header_buf[i++] = (uint32_t)ch;
-        fputc(ch, stdout);
     }
 
+
+    /* Generate wav header from filled out array */
+    WavFileHeader header = read_wav_arr(header_buf, sizeof(header_buf)/sizeof(int));
+    if (args.verbose) { print_wav_header(stderr, header); }
+    if (verify_format(stderr, header) != EXIT_SUCCESS) { return EXIT_FAILURE; }
+
+    size_t samples_num = (header.Format.SampleRate.w * header.Format.BlockAlign.hw * fabsf(info.phase_offset)) + header.Format.BlockAlign.hw;
+    ByteAddressableSignedHalfWord samples[samples_num][header.Format.Channels.hw];
+    memset((void*)&samples, 0, sizeof(samples));
+
+    size_t prev_array_index = 0;
+    size_t start_index = header.Header.Size.w - header.Data.Size.w + sizeof(header.Data) + 4;
+
+    write_wav_header(stdout, header);
 
     /* TODO: figure out why this is here and what purpose it serves */
     /* Two bytes of padding? */
@@ -31,20 +44,6 @@ int main(int argc, char** argv) {
 
     i++;
     fputc(fgetc(stdin), stdout);
-
-
-    /* Generate wav header from filled out array */
-    WavFileHeader header = read_wav_arr(header_buf, sizeof(header_buf)/sizeof(int));
-    if (args.verbose) { print_wav_header(stderr, header); }
-    if (verify_format(stderr, header) != EXIT_SUCCESS) { return EXIT_FAILURE; }
-
-
-    size_t samples_num = (header.Format.SampleRate.w * header.Format.BlockAlign.hw * fabsf(info.phase_offset)) + header.Format.BlockAlign.hw;
-    ByteAddressableSignedHalfWord samples[samples_num][header.Format.Channels.hw];
-    memset((void*)&samples, 0, sizeof(samples));
-
-    size_t prev_array_index = 0;
-    size_t start_index = header.Header.Size.w - header.Data.Size.w + sizeof(header.Data) + 4;
 
     /* Process raw data stream */
     /* TODO: explore what happens when sample index reaches header.Data.Size.w */
