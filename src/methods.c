@@ -43,6 +43,20 @@ Header read_header_arr(uint32_t* buf, size_t len) {
     };
 }
 
+void write_header(FILE* fd, Header header) {
+    for (size_t nibble = 0; nibble < sizeof(header.Id.w); nibble++) {
+        fputc(header.Id.b[nibble], fd);
+    }
+
+    for (size_t nibble = 0; nibble < sizeof(header.Size.w); nibble++) {
+        fputc(header.Size.b[nibble], fd);
+    }
+
+    for (size_t nibble = 0; nibble < sizeof(header.Data.w); nibble++) {
+        fputc(header.Data.b[nibble], fd);
+    }
+}
+
 void print_header(FILE* fd, Header header) {
     fprintf(fd, "HeaderId: %12.*s \n", (int)sizeof(header.Id), header.Id.b);
     fprintf(fd, "HeaderSize: %10u \n", header.Size.w);
@@ -104,6 +118,40 @@ Format read_format_arr(uint32_t* buf, size_t len) {
     };
 }
 
+void write_format(FILE* fd, Format format) {
+    for (size_t nibble = 0; nibble < sizeof(format.Id.w); nibble++) {
+        fputc(format.Id.b[nibble], fd);
+    }
+
+    for (size_t nibble = 0; nibble < sizeof(format.Size.w); nibble++) {
+        fputc(format.Size.b[nibble], fd);
+    }
+
+    for (size_t nibble = 0; nibble < sizeof(format.Format.hw); nibble++) {
+        fputc(format.Format.b[nibble], fd);
+    }
+
+    for (size_t nibble = 0; nibble < sizeof(format.Channels.hw); nibble++) {
+        fputc(format.Channels.b[nibble], fd);
+    }
+
+    for (size_t nibble = 0; nibble < sizeof(format.SampleRate.w); nibble++) {
+        fputc(format.SampleRate.b[nibble], fd);
+    }
+
+    for (size_t nibble = 0; nibble < sizeof(format.ByteRate.w); nibble++) {
+        fputc(format.ByteRate.b[nibble], fd);
+    }
+
+    for (size_t nibble = 0; nibble < sizeof(format.BlockAlign.hw); nibble++) {
+        fputc(format.BlockAlign.b[nibble], fd);
+    }
+
+    for (size_t nibble = 0; nibble < sizeof(format.BitsPerSample.hw); nibble++) {
+        fputc(format.BitsPerSample.b[nibble], fd);
+    }
+}
+
 void print_format(FILE* fd, Format format) {
     fprintf(fd, "FormatId: %12.*s \n", (int)sizeof(format.Id), format.Id.b);
     fprintf(fd, "FormatSize: %10u\n", format.Size.w);
@@ -142,6 +190,16 @@ Data read_data_header_arr(uint32_t* buf, size_t len) {
     };
 }
 
+void write_data_header(FILE* fd, Data data) {
+    for (size_t nibble = 0; nibble < sizeof(data.Id.w); nibble++) {
+        fputc(data.Id.b[nibble], fd);
+    }
+
+    for (size_t nibble = 0; nibble < sizeof(data.Size.w); nibble++) {
+        fputc(data.Size.b[nibble], fd);
+    }
+}
+
 void print_data_header(FILE* fd, Data data_header) {
     fprintf(fd, "DataId: %14.*s \n", (int)sizeof(data_header.Id), data_header.Id.b);
     fprintf(fd, "DataSize: %12u \n", data_header.Size.w);
@@ -167,6 +225,12 @@ WavFileHeader read_wav_arr(uint32_t* buf, size_t len) {
         .Format = read_format_arr(buf + format_offset, len - format_offset),
         .Data = read_data_header_arr(buf + data_offset, len - data_offset)
     };
+}
+
+void write_wav_header(FILE* fd, WavFileHeader header) {
+    write_header(fd, header.Header);
+    write_format(fd, header.Format);
+    write_data_header(fd, header.Data);
 }
 
 int verify_format(FILE* fd, WavFileHeader header) {
