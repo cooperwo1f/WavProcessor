@@ -6,6 +6,7 @@
 #include "types.h"
 
 WavFileHeader read_wav_arr(uint32_t* buf, size_t len);
+void write_wav_header(FILE* fd, WavFileHeader header);
 
 void process_sample(FILE* fd, ProcessingInfo info, WavFileHeader header, ByteAddressableSignedHalfWord samples[][header.Format.Channels.hw], size_t length, size_t index);
 int verify_format(FILE* fd, WavFileHeader header);
