@@ -32,7 +32,7 @@ int main(int argc, char** argv) {
     size_t samples_length = samples_length_unaligned - (samples_length_unaligned % block_size);
 
     ByteAddressableSignedHalfWord samples[samples_length + block_size];
-    memset(samples, 0, samples_length + block_size);
+    memset((void*)&samples, 0, sizeof(samples));
 
     /* Write wav header to stdout */
     write_wav_header(stdout, header);
