@@ -10,7 +10,7 @@ WavFileHeader read_wav_file(FILE* fp);
 WavFileHeader read_wav_arr(uint32_t* buf, size_t len);
 
 size_t write_wav_header(FILE* fd, WavFileHeader header);
-int verify_format(FILE* fd, WavFileHeader header);
 void print_wav_header(FILE* fd, WavFileHeader wav);
+int verify_format(FILE* fd, WavFileHeader header);
 
 #endif /* WAV_METHODS_H */
