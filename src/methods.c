@@ -64,7 +64,7 @@ Header read_header_file(FILE* fp) {
 
 Header read_header_arr(uint32_t* buf, size_t len) {
     /* Verify array will fit into header, otherwise return empty header */
-    if (sizeof(Header) > len) return default_header();
+    if (sizeof(Header) > len) { return default_header(); }
 
     return (Header){
         .Id.b[0] = buf[0],
@@ -131,7 +131,7 @@ Format read_format_file(FILE* fp) {
 
 Format read_format_arr(uint32_t* buf, size_t len) {
     /* Verify array will fit into format, otherwise return empty format */
-    if (sizeof(Format) > len) return default_format();
+    if (sizeof(Format) > len) { return default_format(); }
 
     return (Format){
         .Id.b[0] = buf[0],
@@ -213,7 +213,7 @@ Data read_data_header_file(FILE* fp) {
 
 Data read_data_header_arr(uint32_t* buf, size_t len) {
     /* Verify array will fit into data_header, otherwise return empty data_header */
-    if (sizeof(Data) > len) return default_data_header();
+    if (sizeof(Data) > len) { return default_data_header(); }
 
     return (Data){
         .Id.b[0] = buf[0],
@@ -330,14 +330,4 @@ int verify_format(FILE* fd, WavFileHeader header) {
   }
 
   return 0;
-}
-
-void debug_array(FILE* fd, int* buf, size_t len) {
-  for (size_t i = 0; i < len; i++) {
-      if (i % 8 == 0) { fputc('\n', fd); }
-      fprintf(fd, "%10c", (char)buf[i]);
-  }
-
-  fputc('\n', fd);
-  fputc('\n', fd);
 }
