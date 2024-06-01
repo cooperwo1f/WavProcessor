@@ -41,7 +41,6 @@ typedef struct _Format {
     ByteAddressableWord ByteRate;           /* == SampleRate * NumChannels * BitsPerSample/8 */
     ByteAddressableHalfWord BlockAlign;     /* == NumChannels * BitsPerSample/8. The number of bytes for one sample including all channels */
     ByteAddressableHalfWord BitsPerSample;  /* 8 bits = 8, 16 bits = 16, etc. */
-    ByteAddressableHalfWord ExtraParamSize; /* UNUSED */
 } Format;
 
 typedef struct _Data {

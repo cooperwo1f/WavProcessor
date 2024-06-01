@@ -9,62 +9,72 @@
 #include "methods.h"
 
 int main(int argc, char** argv) {
+    /* Parse command line arguments */
     Arguments args = parse_arguments(argc, argv);
     ProcessingInfo info = { .volume = args.volume, .panning = args.panning, .phase_offset = args.phase_offset };
 
-    uint32_t header_buf[sizeof(WavFileHeader)];
-    size_t i = 0;
-    int ch;
-
-
-    /* Fill character buffer with number of bytes expected in wav header */
-    while ((ch = fgetc(stdin)) != EOF && i < sizeof(WavFileHeader)) {
-        header_buf[i++] = (uint32_t)ch;
-        fputc(ch, stdout);
-    }
-
-
-    /* TODO: figure out why this is here and what purpose it serves */
-    /* Two bytes of padding? */
-    i++;
-    fputc(ch, stdout);
-
-    i++;
-    fputc(fgetc(stdin), stdout);
-
-
-    /* Generate wav header from filled out array */
-    WavFileHeader header = read_wav_arr(header_buf, sizeof(header_buf)/sizeof(int));
+    /* Generate wav header from stdin */
+    WavFileHeader header = read_wav_stream(stdin);
     if (args.verbose) { print_wav_header(stderr, header); }
-    if (verify_format(stderr, header) != EXIT_SUCCESS) { return EXIT_FAILURE; }
+    if (verify_format(stderr, header)) { return EXIT_FAILURE; }
 
+    uint32_t data_length = header.Data.Size.w;
+    uint32_t sample_rate = header.Format.SampleRate.w;
+    uint16_t block_size = header.Format.BlockAlign.hw;
+    uint16_t channels = header.Format.Channels.hw;
+    uint16_t bytes_per_channel = block_size / channels;
 
-    size_t samples_num = (header.Format.SampleRate.w * header.Format.BlockAlign.hw * fabsf(info.phase_offset)) + header.Format.BlockAlign.hw;
-    ByteAddressableSignedHalfWord samples[samples_num][header.Format.Channels.hw];
+    /* Calculate number of samples to store for phase offset */
+    float phase_offset = fabsf(info.phase_offset) / 2.0;
+    size_t one_sample_second = sample_rate * block_size;
 
-    size_t prev_array_index = 0;
-    size_t start_index = header.Header.Size.w - header.Data.Size.w + sizeof(header.Data) + 4;
+    size_t samples_length_unaligned = one_sample_second * phase_offset;
+    size_t samples_length = samples_length_unaligned - (samples_length_unaligned % block_size);
 
-    /* Process raw data stream */
-    /* TODO: explore what happens when sample index reaches header.Data.Size.w */
-    while ((ch = fgetc(stdin)) != EOF) {
-        size_t sample_index = i++ - start_index;
-        size_t array_index = (sample_index / header.Format.BlockAlign.hw) % samples_num;
+    ByteAddressableSignedHalfWord samples[samples_length + block_size];
+    memset(samples, 0, samples_length + block_size);
 
-        /* TODO: change nibble and channel calculations so they actually make sense */
-        size_t nibble_num = sample_index % header.Format.Channels.hw;
-        size_t channel_num = (sample_index / header.Format.Channels.hw) % (header.Format.BlockAlign.hw / header.Format.Channels.hw);
+    /* Write wav header to stdout */
+    write_wav_header(stdout, header);
 
-        if (array_index != prev_array_index) {
-            process_sample(stdout, info, header, samples, samples_num, prev_array_index);
+    /* Process data stream */
+    for (uint32_t block_index = 0; block_index < data_length; block_index += block_size) {
+        size_t sample_index = (block_index / channels) % samples_length;
+
+        /* Calculate index to phase shift to */
+        size_t phase_index = (sample_index + channels) % samples_length;
+
+        for (uint16_t channel = 0; channel < channels; channel++) {
+            ByteAddressableSignedHalfWord block;
+
+            /* Read block in one byte at a time */
+            for (uint16_t nibble = 0; nibble < bytes_per_channel; nibble++) {
+                block.b[nibble] = fgetc(stdin);
+            }
+
+            /* Store block for later use */
+            samples[sample_index + channel] = block;
+
+            /* Process panning and phase */
+            if (channel % 2 == 0) {
+                if (info.phase_offset > 0) { block.sw = samples[phase_index + channel].sw; }
+                if (info.panning > 0) { block.sw *= 1 - info.panning; }
+            }
+
+            else {
+                if (info.phase_offset < 0) { block.sw = samples[phase_index + channel].sw; }
+                if (info.panning < 0) { block.sw *= 1 + info.panning; }
+            }
+
+            /* Process volume */
+            block.sw *= info.volume;
+
+            /* Write channel block to stdout */
+            for (uint16_t nibble = 0; nibble < bytes_per_channel; nibble++) {
+                fputc(block.b[nibble], stdout);
+            }
         }
-
-        samples[array_index][channel_num].b[nibble_num] = ch;
-        prev_array_index = array_index;
     }
-
-    /* Since always processing previous sample, need to finish processing final sample here */
-    process_sample(stdout, info, header, samples, samples_num, prev_array_index);
 
     return EXIT_SUCCESS;
 }
